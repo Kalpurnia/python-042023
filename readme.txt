@@ -1,1 +1,1 @@
-Toto je cvičební pomůcka 
+Toto je cvičební pomůcka oooooochhhhh
