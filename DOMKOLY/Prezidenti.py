@@ -59,7 +59,7 @@ winners_only["result_change"]=winners_only.apply(party_change, axis=1)
 winners_only_means =winners_only.groupby("state")["result_change"].mean(numeric_only=True)
 #print(winners_only_means.sort_values())
 
-winners_only = winners_only.dropna().reset_index()
+#winners_only = winners_only.dropna().reset_index()
 #ted jsem chtěla použít metodu sum() v kombinaci s groupby podle státu, ale aT jsem to zkoušela 
 # jakoliv, tak mi to v novém sloupku "number_of_changes" dávalo všude NaN 
 #psala jsem toto + jsem tam zkoušela dát parametr axis= 0(winners_only["number_of_changes"]=winners_only.groupby(["state"])["result_change"].sum()
@@ -67,12 +67,14 @@ winners_only = winners_only.dropna().reset_index()
 # tak jsem použila cumsum() a protože je to kumiulativní, vyfiltrovala dotazováním  jsem pak jen údaj 
 #za poslední rok, tedy 2016 (2020 vyhozen výše pomocí dropna())
 
-winners_only["number_of_changes"]=winners_only.groupby(["state"])["result_change"].cumsum()
-winners_only = winners_only[winners_only["year"]==2016]
+#winners_only["number_of_changes"]=winners_only.groupby(["state"])["result_change"].cumsum()
+#winners_only = winners_only[winners_only["year"]==2016]
 
 # a teď tedy uspořádat - v prvé řadě podle počtu změn a protože hodně států má stejný 
 # počet změn a tedy stejné pořadí, tak v rámci tohi pořadí ještě státy podle abecedy 
 
+winners_only_sum =winners_only.groupby("state")["result_change"].sum(numeric_only=True)
+print(winners_only)
 
 winners_only = winners_only.sort_values(["number_of_changes", "state"],ascending=[True, True])
 #print (winners_only)
