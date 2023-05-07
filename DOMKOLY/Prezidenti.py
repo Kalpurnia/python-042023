@@ -24,9 +24,10 @@ two_major_competitors = presidents[(presidents["ranking"]==1) |(presidents["rank
 
 # nyní mám za každý stát jednoho vítěze (resp. stranu, která v daném roce zvítězila), ale 
 # musím to seřadit podle států, ne podle let, abych mohla použít metodu shift . Řadit 
-#se bude podle od nejsrarších voleb po nejnovější a státy podle abecedy od A. 
+#se bude podle od nejstarších voleb po nejnovější a státy podle abecedy od A. 
 
 winners_only=winners_only.sort_values(["state","year"], ascending=[True, True])
+winners_switch = winners_only.copy()
 two_major_competitors= two_major_competitors.sort_values(["state","year"], ascending=[True, True]) 
 #print (winners_only.head(30))
 #print (winners_only.tail(30))
@@ -36,12 +37,13 @@ two_major_competitors= two_major_competitors.sort_values(["state","year"], ascen
 # s pomocí metody shift()vytvořit nový sloupec s názvev vítezsné strany v následujícím roce
 
 winners_only["next_election_winner"]=winners_only.groupby(["state"])["party_simplified"].shift(-1)
+
 #print (winners_only.head(30))
 #print (winners_only.tail(30))
 
 # zkusím nadefinovat funkci, která bude vracet 0 (beze změny), 1(změna strany)
 def party_change (row): 
-    for state in row.loc["state"]: 
+    # for state in row.loc["state"]: (po konzultaci - zbytečný cyklus, metoda apply postupuje po řádcích)
         if pandas.isnull(row["next_election_winner"]):
             return None 
         elif row.loc["party_simplified"] == row.loc["next_election_winner"]:
@@ -59,25 +61,25 @@ winners_only["result_change"]=winners_only.apply(party_change, axis=1)
 winners_only_means =winners_only.groupby("state")["result_change"].mean(numeric_only=True)
 #print(winners_only_means.sort_values())
 
-#winners_only = winners_only.dropna().reset_index()
-#ted jsem chtěla použít metodu sum() v kombinaci s groupby podle státu, ale aT jsem to zkoušela 
-# jakoliv, tak mi to v novém sloupku "number_of_changes" dávalo všude NaN 
-#psala jsem toto + jsem tam zkoušela dát parametr axis= 0(winners_only["number_of_changes"]=winners_only.groupby(["state"])["result_change"].sum()
-# nepodařilo se, ale fungovalo jen cumsum()
-# tak jsem použila cumsum() a protože je to kumiulativní, vyfiltrovala dotazováním  jsem pak jen údaj 
+
+winners_only = winners_only.dropna().reset_index()
+
+# pro původní nejasnosti se sum() jsem použila cumsum() a protože je to kumiulativní, vyfiltrovala dotazováním  jsem pak jen údaj 
 #za poslední rok, tedy 2016 (2020 vyhozen výše pomocí dropna())
 
-#winners_only["number_of_changes"]=winners_only.groupby(["state"])["result_change"].cumsum()
-#winners_only = winners_only[winners_only["year"]==2016]
+winners_only["number_of_changes"]=winners_only.groupby(["state"])["result_change"].cumsum()
+winners_only = winners_only[winners_only["year"]==2016]
 
 # a teď tedy uspořádat - v prvé řadě podle počtu změn a protože hodně států má stejný 
-# počet změn a tedy stejné pořadí, tak v rámci tohi pořadí ještě státy podle abecedy 
-
-winners_only_sum =winners_only.groupby("state")["result_change"].sum(numeric_only=True)
-print(winners_only)
-
+# počet změn a tedy stejné pořadí, tak v rámci toho pořadí ještě státy podle abecedy 
 winners_only = winners_only.sort_values(["number_of_changes", "state"],ascending=[True, True])
-#print (winners_only)
+
+
+"""PO KONZULTACI - VYUŽITÍ SUM() by mělo být takto, ale už nechávám původní postup. 
+### nicméně výhodám tohoto rozumím. 
+winners_only_sum =winners_only.groupby("state")["result_change"].sum(numeric_only=True)
+winners_only_sum =winners_only_sum.sort_values(ascending=True)
+print (winners_only_sum)"""
 
 
 # Graf 
@@ -98,11 +100,12 @@ plt.xlabel("Stát")
 #plt.show()
 
 
-# II. ČÁST - nahoře jsem si dopřipravila tu tabulku se dvěma hlavními rivaly (df two_major_competitors)two_major_competitors
+###II. ČÁST - nahoře jsem si předpřipravila tu tabulku se dvěma hlavními rivaly (df two_major_competitors)two_major_competitors
 
-
+two_major_competitors= two_major_competitors.sort_values(["state", "year", "candidatevotes"], ascending=[True, True, False])
 two_major_competitors["compare_votes"]=two_major_competitors.groupby(["year", "state"])["candidatevotes"].shift(-1) 
-#print(two_major_competitors.head(30))
+
+#print(two_major_competitors)
 
 two_major_competitors_diff = two_major_competitors.dropna().reset_index()
 #print (two_major_competitors_diff)
@@ -111,9 +114,36 @@ two_major_competitors_diff["absolute_difference"]= two_major_competitors_diff["c
 #print (two_major_competitors_diff)
 
 #relativní margin 
-
+ 
 two_major_competitors_diff["relative_margin"]=two_major_competitors_diff["absolute_difference"] /two_major_competitors_diff["totalvotes"]
 #print(two_major_competitors_diff)
 
-print(two_major_competitors_diff.sort_values("relative_margin",ascending=False).head(1))
-print(two_major_competitors_diff)
+
+#print(two_major_competitors_diff.sort_values("relative_margin").head(1))
+
+# pivot 
+# udělala jsem si novou tabulku s jiným názvem jako kopii df winners_only (řádek 40)před tím, 
+# než jsem ve winners only začala dělat další změny(např. filtrování roku 2016) -kopie se 
+#jmenuje winners_switch
+winners_switch["next_election_winner"]=winners_switch.groupby(["state"])["party_simplified"].shift(1)
+winners_switch=winners_switch.dropna().reset_index()
+print (winners_switch)
+def party_comparison(row):
+      if row["party_simplified"]==row["next_election_winner"]:
+            return "no_change"
+      if row["party_simplified"]in ["DEMOCRAT"] and row["next_election_winner"] in ["REPUBLICAN"]:
+            return "from DEM to REP"
+      if row["party_simplified"]in ["REPUBLICAN"] and row["next_election_winner"] in ["DEMOCRAT"]:
+            return "from REP to DEM"
+      else: 
+            return None # (pro pořádek. Pravděpodobně nedošlo k tomu, že by někde na 
+            # prvních dvou místech byla jiná strana, ale nekontrolovala jsem celou tabulku,
+            #takže si nemůžu být jistá) 
+      
+
+winners_switch["switch"]=winners_switch.apply(party_comparison, axis=1)      
+#print(winners_switch.head(50))
+
+
+winners_switch_pivot_table = pandas.pivot_table(winners_switch, values = "state", index ="year", columns = "switch", aggfunc="count") 
+print (winners_switch_pivot_table)
