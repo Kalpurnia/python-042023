@@ -26,6 +26,7 @@ res=mod.fit()
 #print(res.summary())
 #R-squared:  0.396  (GDP vysvěluje necelých 40 % variability naděje na dožití)
 
+
 #2/ přidat další proměnné do modelu: 
 
 formula = "Life_expectancy ~ GDP_per_capita+ Schooling+Incidents_HIV+Diphtheria+Polio+BMI + Measles"
