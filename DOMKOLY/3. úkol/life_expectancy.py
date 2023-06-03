@@ -64,6 +64,11 @@ res=mod.fit()
 # koeficent determinace se bez této proměnné nezměnil, vyšel opět 0.79
 
 
+
+
+
+
+
 #-------------------------------------------------------------------------------------------------
 
 #2/ Z hlediska statusu rozvojová/rozvinutá 
