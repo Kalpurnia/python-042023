@@ -1,3 +1,4 @@
+
 import pandas 
 import  matplotlib.pyplot as plt
 presidents = pandas.read_csv("1976-2020-president.csv")
