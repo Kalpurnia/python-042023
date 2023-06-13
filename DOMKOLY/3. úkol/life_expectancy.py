@@ -69,7 +69,6 @@ res=mod.fit()
 
 
 
-
 #-------------------------------------------------------------------------------------------------
 
 #2/ Z hlediska statusu rozvojová/rozvinutá 
@@ -131,11 +130,11 @@ seaborn.regplot(lif_exp_underdev, x = "GDP_per_capita", y ="Life_expectancy", sc
 
 #lif_exp_underdev["Life_expectancy_square"]=numpy.square(lif_exp_underdev["Life_expectancy"])
 
-seaborn.regplot(lif_exp_underdev, x = "GDP_per_capita", y ="Life_expectancy_square", scatter_kws={"s":3},line_kws={"color":"r"})
+#seaborn.regplot(lif_exp_underdev, x = "GDP_per_capita", y ="Life_expectancy_square", scatter_kws={"s":3},line_kws={"color":"r"})
 # plt.show()
 
 lif_exp_underdev["GDP_per_capita_log"]=numpy.log(lif_exp_underdev["GDP_per_capita"])
-seaborn.regplot(lif_exp_underdev, x = "GDP_per_capita_log", y ="Life_expectancy_square", scatter_kws={"s":3},line_kws={"color":"r"})
+#seaborn.regplot(lif_exp_underdev, x = "GDP_per_capita_log", y ="Life_expectancy_square", scatter_kws={"s":3},line_kws={"color":"r"})
 #plt.show()
 
 
@@ -153,7 +152,7 @@ print(res.summary())
 #R-squared: 0.521
 
 
-formula = "Life_expectancy_square ~ GDP_per_capita_log"
+#formula = "Life_expectancy_square ~ GDP_per_capita_log"
 mod=smf.ols(formula, lif_exp_underdev)
 res=mod.fit()
 print(res.summary())
@@ -198,7 +197,8 @@ lif_exp_underdev_out= lif_exp_underdev[lif_exp_underdev["GDP_per_capitaZscore"]<
 formula = "Life_expectancy ~ GDP_per_capita+ Schooling+Incidents_HIV+Diphtheria+Polio+BMI + Measles"
 mod=smf.ols(formula, lif_exp_underdev_out)
 res=mod.fit()
-print(res.summary())
+#print(res.summary())
 # R-squared: 0.712 (čili odstraněním 3 outliers se mi na vržený model zhoršil i oproti tomu s netransformovaným GDP, tomu 
 # nerozumím. )
 
+print (lif_exp["Thinness_five_nine_years"])
